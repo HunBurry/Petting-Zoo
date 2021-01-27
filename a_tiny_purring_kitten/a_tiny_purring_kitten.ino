@@ -9,6 +9,10 @@ int motor, sensor, lastTime;
 int purrTime;
 
 void setup() {
+  /*
+   * Basic I/O device setup, and initilize 
+   * the timing systems. 
+   */
   motor = 3;
   sensor = 2;
   lastTime = 0;
@@ -17,6 +21,12 @@ void setup() {
 }
 
 void loop() {
+  /*
+   * Determines if the "cat's" sensor is being
+   * touched. If so, we determine if the petting
+   * is too rough. If so, we stop purring, but if 
+   * not, we can begin/keep purring. 
+   */
   if (detectTouch()) {
     if (isRough()) {
       purr(false);
@@ -28,6 +38,11 @@ void loop() {
 }
 
 boolean detectTouch() {
+  /*
+   * Determine if the touch sensor is being
+   * interacted with. If so, return true, 
+   * if not, return false. 
+   */
   if(digitalRead(sensor) == HIGH) {
     delay(500);
     return true;
@@ -38,6 +53,13 @@ boolean detectTouch() {
 }
 
 boolean isRough() {
+  /*
+   * Determine if the "petting" is too rough.
+   * Rough means the user is touching the sensor
+   * too fast (i.e. two touches within a two second
+   * period. If too rough, return true, else, return
+   * false. 
+   */
   int curTime = millis();
   if (lastTime - curTime >= 2000) {
     return true;
@@ -49,5 +71,9 @@ boolean isRough() {
 }
 
 void purr(boolean stat) {
+  /*
+   * Turns on/off the "purring" motor in response
+   * to the roughness being passed in. 
+   */
   digitalWrite(motor, stat);
 }

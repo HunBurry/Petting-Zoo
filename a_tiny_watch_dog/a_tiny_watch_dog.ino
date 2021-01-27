@@ -1,16 +1,46 @@
 /*
  * "Watch Dog"
- * This animal reacts to loud sounds by turning to face them,
+ * This animal reacts to loud sounds by "barking",
  * acting as a guard dog or watch dog. 
  */
 
+int sensor, buzzer;
 
 void setup() {
-  // put your setup code here, to run once:
-
+  sensor = 2;
+  buzzer = 3;
+  pinMode(sensor, INPUT);
+  pinMode(buzzer, OUTPUT);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  if (detectSound()) {
+    bark();
+  }
+}
 
+boolean detectSound() {
+  if (digitalRead(sensor) == HIGH) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+void bark() {
+  int choice = random(1, 4);
+  if (choice == 1) { //bark, pause, bark
+    tone(buzzer, 2000, 500);
+    delay(500);
+    tone(buzzer, 2000, 500); 
+  }
+  else if (choice == 2) { ///bark, bark, bark
+    tone(buzzer, 2000, 300);
+    tone(buzzer, 2000, 300);
+    tone(buzzer, 2000, 300);
+  }
+  else { //howl
+    tone(buzzer, 3500, 1500);
+  }
 }

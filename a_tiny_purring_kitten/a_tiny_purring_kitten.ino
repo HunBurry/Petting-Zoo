@@ -9,7 +9,6 @@
  */
 
 CapacitiveSensor sensor = CapacitiveSensor(3,4);
-int curPin;
 Adafruit_NeoPixel strip(3, 2, NEO_GRB + NEO_KHZ800);
 
 void setup() {
@@ -17,21 +16,17 @@ void setup() {
    * Basic I/O device setup, and initilize 
    * the timing systems. 
    */
-  curPin = 0;
   strip.begin();
   strip.show();
-  ///pinMode(2, OUTPUT);
   sensor.set_CS_AutocaL_Millis(0xFFFFFFFF);
-  ///pinMode(motor, OUTPUT);
-  ///pinMode(sensor, INPUT);
 }
 
 void loop() {
   /*
    * Determines if the "cat's" sensor is being
-   * touched. If so, we determine if the petting
-   * is too rough. If so, we stop purring, but if 
-   * not, we can begin/keep purring. 
+   * touched. If so, we determine if the petting/holding
+   * is too rough/long. We use this to determine output
+   * happiness. 
    */
   detectTouch();
 }
@@ -39,8 +34,11 @@ void loop() {
 void detectTouch() {
   /*
    * Determine if the touch sensor is being
-   * interacted with. If so, return true, 
-   * if not, return false. 
+   * interacted with. If so, we begin the happiness 
+   * determination process using the current time and 
+   * the time that they started touching the sensor. If 
+   * the user is not touching the sensor, ensure the lights
+   * are all off. 
    */
   long total = sensor.capacitiveSensor(30);
   if(total > 100) {
@@ -57,6 +55,9 @@ void detectTouch() {
 }
 
 void allOff() {
+  /*
+   * Turn all Neopixel lights off. 
+   */
   for (int i = 0; i < 4; i++) {
     strip.setPixelColor(i, 0, 0, 0);
   }
@@ -64,12 +65,24 @@ void allOff() {
 }
 
 void turnOn(int loc, int r, int g, int b) {
+  /*
+   * Turn on X amount of lights to the given
+   * RGB value. 
+   */
   for (int i = 0; i < loc; i++) {
     strip.setPixelColor(i, r, g, b);
   }
 }
 
 void determineHappiness(int timePassed) {
+  /*
+   * Set the "happiness" level on the Neopixel strip. 
+   * Every second until 4 seconds have passed, we go up
+   * one green light to show more happiness. 4000 is the "best"
+   * time. After this, we start going to red every second for three
+   * seconds, until 7 seconds is reached. At that point, lights start
+   * blinking to show extreme unhappiness. 
+   */
   if (timePassed >= 1000 && timePassed < 2000) {
      turnOn(1, 0, 255, 0);
   }

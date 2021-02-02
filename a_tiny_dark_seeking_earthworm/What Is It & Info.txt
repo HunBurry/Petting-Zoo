@@ -1,0 +1,4 @@
+Orginal Goal: Earthworm that rotated on a motor to find the area with a suitable amount of light. 
+End Product: Earthworm that reacts to light with Red, Green, and Yellow lights to show "happiness."
+
+Passed all nets and design rules. 

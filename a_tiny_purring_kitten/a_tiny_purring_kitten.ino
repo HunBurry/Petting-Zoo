@@ -1,3 +1,6 @@
+#include <Adafruit_NeoPixel.h>
+#include <CapacitiveSensor.h>
+
 /*
  * "Purring Cat"
  * This "animal" responds to someone touching the captive touch sensor by purring, 
@@ -5,19 +8,22 @@
  * being too fast/rough. 
  */
 
-int motor, sensor, lastTime;
-int purrTime;
+CapacitiveSensor sensor = CapacitiveSensor(3,4);
+int curPin;
+Adafruit_NeoPixel strip(3, 2, NEO_GRB + NEO_KHZ800);
 
 void setup() {
   /*
    * Basic I/O device setup, and initilize 
    * the timing systems. 
    */
-  motor = 3;
-  sensor = 2;
-  lastTime = 0;
-  pinMode(motor, OUTPUT);
-  pinMode(sensor, INPUT);
+  curPin = 0;
+  strip.begin();
+  strip.show();
+  ///pinMode(2, OUTPUT);
+  sensor.set_CS_AutocaL_Millis(0xFFFFFFFF);
+  ///pinMode(motor, OUTPUT);
+  ///pinMode(sensor, INPUT);
 }
 
 void loop() {
@@ -27,53 +33,68 @@ void loop() {
    * is too rough. If so, we stop purring, but if 
    * not, we can begin/keep purring. 
    */
-  if (detectTouch()) {
-    if (isRough()) {
-      purr(false);
-    }
-    else {
-      purr(true);
-    }
-  }
+  detectTouch();
 }
 
-boolean detectTouch() {
+void detectTouch() {
   /*
    * Determine if the touch sensor is being
    * interacted with. If so, return true, 
    * if not, return false. 
    */
-  if(digitalRead(sensor) == HIGH) {
-    delay(500);
-    return true;
+  long total = sensor.capacitiveSensor(30);
+  if(total > 100) {
+    long start = millis();
+    long endTime;
+    while (sensor.capacitiveSensor(30) > 100) {
+      endTime = millis();
+      determineHappiness(endTime - start);
+    }
   }
   else {
-    return false;
+    allOff();
   }
 }
 
-boolean isRough() {
-  /*
-   * Determine if the "petting" is too rough.
-   * Rough means the user is touching the sensor
-   * too fast (i.e. two touches within a two second
-   * period. If too rough, return true, else, return
-   * false. 
-   */
-  int curTime = millis();
-  if (lastTime - curTime >= 2000) {
-    return true;
+void allOff() {
+  for (int i = 0; i < 4; i++) {
+    strip.setPixelColor(i, 0, 0, 0);
   }
-  else {
-    return false;
-  }
-  lastTime = curTime;
+  strip.show();
 }
 
-void purr(boolean stat) {
-  /*
-   * Turns on/off the "purring" motor in response
-   * to the roughness being passed in. 
-   */
-  digitalWrite(motor, stat);
+void turnOn(int loc, int r, int g, int b) {
+  for (int i = 0; i < loc; i++) {
+    strip.setPixelColor(i, r, g, b);
+  }
+}
+
+void determineHappiness(int timePassed) {
+  if (timePassed >= 1000 && timePassed < 2000) {
+     turnOn(1, 0, 255, 0);
+  }
+  else if (timePassed >= 2000 && timePassed < 3000) {
+    turnOn(2, 0, 255, 0);
+  }
+  else if (timePassed >= 3000 && timePassed < 4000) {
+    turnOn(3, 0, 255, 0);
+  }
+  else if (timePassed >= 4000 && timePassed < 5000) {
+    allOff();
+    turnOn(1, 255, 0, 0);
+  }
+  else if (timePassed > 1000 && timePassed < 6000) {
+    turnOn(2, 255, 0, 0);
+  }
+  else if (timePassed > 1000 && timePassed < 7000) {
+    turnOn(3, 255, 0, 0);
+  }
+  else if (timePassed >= 7000) {
+    allOff();
+    delay(100);
+    turnOn(3, 255, 0, 0);
+    strip.show();
+    delay(100);
+  }
+  strip.show();
 }
